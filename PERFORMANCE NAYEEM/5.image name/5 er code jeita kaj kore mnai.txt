@@ -1,0 +1,113 @@
+#include <windows.h>
+#include <GL/gl.h>
+#include <GL/glut.h>
+#include <iostream>
+#include <cstring>
+#include "glutil.h"
+
+// Global variables
+float textMovement = 0.0f; // Controls the movement of the text
+
+// Function to draw text on the screen
+void drawText(const char *text, float x, float y)
+{
+    glRasterPos2f(x, y);
+    for (size_t i = 0; i < strlen(text); ++i)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, text[i]);
+    }
+}
+
+// Function to display content on the screen
+void display()
+{
+    // Clear the color buffer
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Set background color
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+
+    // Set up the modelview matrix
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    // Draw a white background quad
+    glColor3d(1.0, 1.0, 1.0);
+    glBegin(GL_QUADS);
+    glVertex2f(-1.0f, -1.0f);
+    glVertex2f(1.0f, -1.0f);
+    glVertex2f(1.0f, 1.0f);
+    glVertex2f(-1.0f, 1.0f);
+    glEnd();
+
+    // Draw a cyan rectangle
+    glColor3d(0.0, 1.0, 1.0);
+    glBegin(GL_QUADS);
+    glVertex2f(-0.6f, -0.6f);
+    glVertex2f(0.6f, -0.6f);
+    glVertex2f(0.6f, 0.6f);
+    glVertex2f(-0.6f, 0.6f);
+    glEnd();
+
+    // Apply texture to the rectangle
+    ApplyTexture(0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, textures[0].textureID);
+
+    // Draw the story text "Once upon a time"
+    glColor3f(0.0, 0.0, 0.0); // Black color
+    glPushMatrix();
+    glTranslatef(textMovement, 0.0f, 0.0f);
+    drawText("Lionel Messi has shaken hands with paradise,", -0.6, -0.8);
+    glPopMatrix();
+
+    // Flush drawing commands
+    glFlush();
+
+    // Swap buffers to display the rendered image
+    glutSwapBuffers();
+}
+
+// Function to update the scene
+void update(int value)
+{
+    // Update text movement
+    textMovement += 0.001f;
+    if (textMovement > 2.0)
+    {
+        textMovement = -2.0;
+    }
+
+    // Redraw the scene
+    glutPostRedisplay();
+
+    // Set the next timer
+    glutTimerFunc(16, update, 0); // 60 FPS
+}
+
+// Main function
+int main(int argc, char **argv)
+{
+    // Initialize GLUT
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowSize(800, 600);
+    glutCreateWindow(""Lionel Messi has shaken hands with paradise,"");
+
+    // Load texture
+    loadImageAndStore(""E:\7th semester\FINALTERM\COMPUTER GRAPHICS\PERFORMANCE\New folder\download (3).bmp"");
+
+    // Set up the projection matrix
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(-1.5, 1.5, -1.5, 1.5);
+
+    // Register display callback function
+    glutDisplayFunc(display);
+
+    // Set up the update function to be called at 60 FPS
+    glutTimerFunc(16, update, 0); // 60 FPS
+
+    // Start the main loop
+    glutMainLoop();
+
+    return 0;
+}

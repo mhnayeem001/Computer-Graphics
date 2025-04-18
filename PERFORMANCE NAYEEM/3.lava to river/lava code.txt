@@ -1,0 +1,122 @@
+#include <iostream>
+#include <GL/glut.h>
+#include <vector>
+#include <ctime>
+#include <cstdlib>
+#include <cmath>
+
+using namespace std;
+
+const int WINDOW_WIDTH = 800;
+const int WINDOW_HEIGHT = 600;
+
+struct LavaParticle {
+    float x;
+    float y;
+    float speed;
+};
+
+const int NUM_LAVA_PARTICLES = 500;
+vector<LavaParticle> lavaParticles(NUM_LAVA_PARTICLES);
+
+float volcanoHeight = 500.0f;
+float riverHeight = 200.0f;
+
+void init() {
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, WINDOW_WIDTH, 0, 2*WINDOW_HEIGHT);
+
+    srand(time(NULL));
+
+    // Initialize lava particles
+    for (int i = 0; i < NUM_LAVA_PARTICLES; ++i) {
+        lavaParticles[i].x = WINDOW_WIDTH / 2; // Start from the center of the volcano
+        lavaParticles[i].y = WINDOW_HEIGHT / 30; // Start from the top of the volcano
+        lavaParticles[i].speed = (rand() % 10) + 1; // Randomize speed
+    }
+}
+
+void drawRiver() {
+    glColor3f(0.1, 0.3, 0.7); // Blue color
+    glBegin(GL_QUADS);
+    glVertex2f(0.0f, 0.0f);
+    glVertex2f(WINDOW_WIDTH, 0.0f);
+    glVertex2f(WINDOW_WIDTH, riverHeight);
+    glVertex2f(0.0f, riverHeight);
+    glEnd();
+}
+
+void drawVolcano() {
+    glColor3f(0.8, 0.4, 0.1); // Brown color
+
+    // Draw volcano body
+    glBegin(GL_TRIANGLES);
+    glVertex2f(WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT - 50);
+    glVertex2f(WINDOW_WIDTH / 2 + 50, WINDOW_HEIGHT - 50);
+    glVertex2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT + volcanoHeight);
+    glEnd();
+
+    // Draw volcano top circle
+    glColor3f(0.9, 0.1, 0.1); // Brown color
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT + volcanoHeight-1);
+    for (int i = 0; i <= 360; ++i) {
+        float angle = i * 3.1415926f / 180;
+        float x = WINDOW_WIDTH / 2 + cos(angle) * 25;
+        float y = WINDOW_HEIGHT + volcanoHeight + sin(angle) * 25;
+        glVertex2f(x, y);
+    }
+    glEnd();
+}
+
+void drawLavaParticle(LavaParticle particle) {
+    glColor3f(1.0, 0.0, 0.0); // Red color
+    glPointSize(10.0); // Increase point size
+    glBegin(GL_POINTS);
+    glVertex2f(particle.x, particle.y);
+    glEnd();
+}
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    drawRiver();
+    drawVolcano();
+
+    // Draw lava particles
+    for (int i = 0; i < NUM_LAVA_PARTICLES; ++i) {
+        drawLavaParticle(lavaParticles[i]);
+    }
+
+    glutSwapBuffers();
+}
+
+void update(int value) {
+    // Update lava flow
+    for (int i = 0; i < NUM_LAVA_PARTICLES; ++i) {
+        // Move lava particles down
+        lavaParticles[i].y -= lavaParticles[i].speed;
+
+        // If lava reaches the river, reset its position to the top of the volcano
+        if (lavaParticles[i].y <= riverHeight) {
+            lavaParticles[i].y = WINDOW_HEIGHT - 50;
+        }
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(25, update, 0);
+}
+
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+    glutCreateWindow("lava to river");
+    init();
+    glutDisplayFunc(display);
+    glutTimerFunc(25, update, 0);
+    glutMainLoop();
+    return 0;
+}

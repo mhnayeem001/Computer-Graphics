@@ -1,0 +1,74 @@
+#include <windows.h>
+#include <GL/gl.h>
+#include <GL/glut.h>
+#include <iostream>
+
+float scale = 1.0f;
+bool zoomIn = true;
+void drawText(const char *text, float x, float y)
+{
+    glRasterPos2f(x, y);
+    for (int i = 0; i < strlen(text); ++i)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, text[i]);
+    }
+}
+
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+
+    // Draw a square
+    glColor3f(2.0f, 0.5f, 1.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(-0.5f * scale, -0.5f * scale);
+    glVertex2f(0.5f * scale, -0.5f * scale);
+    glVertex2f(0.5f * scale, 0.5f * scale);
+    glVertex2f(-0.5f * scale, 0.5f * scale);
+    glEnd();
+        glPopMatrix();
+    glColor3f(1.0, 0.0, 0.0); // red color
+    //glTranslatef(_move, 0.0f, 5.0f);
+    drawText("chini chara cha lara diya khah fuhhh", -0.4, -0.5);
+    glFlush();
+    glutSwapBuffers();
+}
+
+void update(int value)
+{
+    // Increment or decrement the scale factor based on zoom direction
+    if (zoomIn)
+    {
+        scale += 0.05f; // Zoom in
+        if (scale >= 2.0f) // Max zoom limit
+            zoomIn = false;
+    }
+    else
+    {
+        scale -= 0.01f; // Zoom out
+        if (scale <= 0.5f) // Min zoom limit
+            zoomIn = true;
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(20, update, 0); // Set the next timer
+}
+
+int main(int argc, char **argv)
+{
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowSize(800, 600);
+    glutCreateWindow("Zoom in out ");
+
+    gluOrtho2D(-1, 1, -1, 1);
+    glutDisplayFunc(display);
+    glutTimerFunc(0, update, 0); // Start the timer
+
+    glutMainLoop();
+
+    return 0;
+}

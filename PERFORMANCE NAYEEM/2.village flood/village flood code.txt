@@ -1,0 +1,154 @@
+#include <iostream>
+#include <GL/glut.h>
+#include <ctime>
+#include <cstdlib>
+#include <vector>
+
+using namespace std;
+
+const int WINDOW_WIDTH = 800;
+const int WINDOW_HEIGHT = 600;
+
+struct Raindrop {
+    float x;
+    float y;
+    float length;
+    float speed;
+};
+
+const int NUM_RAINDROPS = 2000;
+vector<Raindrop> raindrops(NUM_RAINDROPS);
+float riverHeight = 0.0f;
+
+// Function to draw a rectangle
+void drawRectangle(int x1, int y1, int x2, int y2, float r, float g, float b) {
+    glColor3f(r, g, b);
+    glBegin(GL_QUADS);
+    glVertex2i(x1, y1);
+    glVertex2i(x2, y1);
+    glVertex2i(x2, y2);
+    glVertex2i(x1, y2);
+    glEnd();
+}
+
+// Function to draw a triangle
+void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, float r, float g, float b) {
+    glColor3f(r, g, b);
+    glBegin(GL_TRIANGLES);
+    glVertex2i(x1, y1);
+    glVertex2i(x2, y2);
+    glVertex2i(x3, y3);
+    glEnd();
+}
+
+// Function to draw the river
+void drawRiver() {
+    drawRectangle(0, 0, 800, 50, 0.1, 0.3, 0.7); // Dark blue river
+      glColor3f(0.49, 0.49, 0.70); // Blue color
+    glBegin(GL_QUADS);
+    glVertex2f(0.0f, 0.0f);
+    glVertex2f(WINDOW_WIDTH, 0.0f);
+    glVertex2f(WINDOW_WIDTH, riverHeight);
+    glVertex2f(2.0f, riverHeight);
+    glEnd();
+}
+
+// Function to draw a house
+void drawHouse(int x, int y) {
+    drawRectangle(x - 40, y, x + 40, y + 80, 0.6, 0.4, 0.2); // Brown rectangle for house body
+    drawTriangle(x - 45, y + 80, x + 45, y + 80, x, y + 120, 0.8, 0.2, 0.2); // Red triangle for roof
+    drawRectangle(x - 10, y + 20, x + 10, y + 40, 0.5, 0.5, 0.5); // Gray rectangle for door
+    drawRectangle(x - 30, y + 50, x - 10, y + 70, 2.0f, 0.5f, 1.0f); // Window 1 lilac color
+    drawRectangle(x + 10, y + 50, x + 30, y + 70, 2.0f, 0.5f, 1.0f); // Window 2
+}
+
+// Function to draw a tree
+void drawTree(int x, int y) {
+    drawRectangle(x - 5, y, x + 5, y + 60, 0.6, 0.3, 0.1); // Brown rectangle for trunk
+    drawTriangle(x - 20, y + 60, x + 20, y + 60, x, y + 120, 0.0, 0.5, 0.0); // Green triangle for leaves
+}
+
+// Function to draw the village
+void drawVillage() {
+    drawHouse(600, 400);
+    drawHouse(500, 450);
+    drawHouse(400, 400);
+    drawHouse(300, 450);
+    drawTree(50, 400);
+    drawTree(100, 400);
+    drawTree(150, 400);
+    drawTree(200, 400);
+    drawTree(700, 400);
+    drawTree(780, 400);
+
+}
+void init() {
+    glClearColor(1.0, 1.0, 1.0, 1.0); // White background
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT);
+
+    srand(time(NULL));
+
+    for (int i = 0; i < NUM_RAINDROPS; ++i) {
+        raindrops[i].x = rand() % WINDOW_WIDTH;
+        raindrops[i].y = rand() % WINDOW_HEIGHT;
+        raindrops[i].length = (rand() % 5) + 5;
+        raindrops[i].speed = (rand() % 5) + 5;
+    }
+}
+
+// Function to draw raindrops
+void drawRaindrop(Raindrop drop) {
+    glBegin(GL_LINES);
+    glVertex2f(drop.x, drop.y);
+    glVertex2f(drop.x, drop.y - drop.length);
+    glEnd();
+}
+
+// Function to display
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    drawRiver();
+    drawVillage();
+
+    glColor3f(0.7, 0.7, 1.0);
+    for (int i = 0; i < NUM_RAINDROPS; ++i) {
+        drawRaindrop(raindrops[i]);
+    }
+
+    // Increase river height if it's not at the top
+    if (riverHeight < WINDOW_HEIGHT) {
+        riverHeight += 0.5f;
+    }
+
+    glutSwapBuffers();
+}
+
+// Function to initialize
+
+
+void update(int value) {
+    for (int i = 0; i < NUM_RAINDROPS; ++i) {
+        raindrops[i].y -= raindrops[i].speed;
+        if (raindrops[i].y < 0) {
+            raindrops[i].y = WINDOW_HEIGHT;
+        }
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(25, update, 0);
+}
+
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+    glutCreateWindow("Goriber grame bonna");
+    init();
+    glutDisplayFunc(display);
+    glutTimerFunc(25, update, 0);
+    glutMainLoop();
+    return 0;
+}

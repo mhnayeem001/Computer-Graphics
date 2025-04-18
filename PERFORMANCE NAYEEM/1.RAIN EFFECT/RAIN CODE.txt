@@ -1,0 +1,96 @@
+//TASK_1: Create a rain effect
+///*
+#include <windows.h>
+#include <GL/glut.h>
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+#define MAX_RAIN_DROPS 1000
+
+// Structure for a raindrop
+struct Raindrop {
+    float x, y; // Position
+    float speed; // Falling speed
+    float size; // Size
+    float r, g, b; // Color
+};
+
+Raindrop raindrops[MAX_RAIN_DROPS];
+
+// Initialize the raindrops
+void initRain() {
+    srand(time(NULL));
+    for (int i = 0; i < MAX_RAIN_DROPS; i++) {
+        raindrops[i].x = (float)(rand() % glutGet(GLUT_WINDOW_WIDTH));
+        raindrops[i].y = (float)(rand() % glutGet(GLUT_WINDOW_HEIGHT));
+        raindrops[i].speed = 10.0f + static_cast<float>(rand() % 10) / 10.0f; // Random speed between 2.0 and 3.0
+        raindrops[i].size = 1.0f + static_cast<float>(rand() % 5) / 5.0f; // Random size between 1.0 and 2.0
+        raindrops[i].r = 0.5f; // Red color component
+        raindrops[i].g = 0.5f; // Green color component
+        raindrops[i].b = 1.0f; // Blue color component
+    }
+}
+
+// Update the raindrops' positions
+void updateRain() {
+    for (int i = 0; i < MAX_RAIN_DROPS; i++) {
+        raindrops[i].y -= raindrops[i].speed;
+        if (raindrops[i].y < 0.0f) {
+            raindrops[i].y = glutGet(GLUT_WINDOW_HEIGHT); // Reset the raindrop to the top of the screen
+        }
+    }
+}
+
+// Draw the raindrops
+void drawRain() {
+    glPointSize(3.0);
+    glBegin(GL_POINTS);
+    for (int i = 0; i < MAX_RAIN_DROPS; i++) {
+        glColor3f(raindrops[i].r, raindrops[i].g, raindrops[i].b);
+        glVertex2f(raindrops[i].x, raindrops[i].y);
+    }
+    glEnd();
+}
+
+// Display function
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    updateRain();
+    drawRain();
+    glutSwapBuffers();
+}
+
+// Reshape function
+void reshape(int w, int h) {
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, w, 0, h);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+void update(int value) {
+    glutPostRedisplay();
+    glutTimerFunc(16, update, 0);
+}
+
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowSize(800, 600);
+    glutCreateWindow("Rain Effect");
+    glClearColor(01.0, 01.0, 01.0, 1.0);
+    //glutDisplayFunc(all);       // Register callback handler for window re-paint event
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutTimerFunc(0, update, 0); // Start update loop
+    initRain();
+
+    glutMainLoop();
+    return 0;
+}
+
+
+
+
+

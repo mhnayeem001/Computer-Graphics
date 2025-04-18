@@ -1,0 +1,109 @@
+#include <iostream>
+#include <GL/glut.h>
+#include <windows.h>
+#include <string>
+#include "glutil.h"
+// Function to load texture
+GLuint loadTexture(const char* filename) {
+    // Your texture loading code here
+    // This is just a placeholder
+    GLuint textureID = 0;
+    return textureID;
+}
+
+float textPosition = 0.0f;
+
+void drawText(const char *text, float x, float y)
+{
+    glRasterPos2f(x, y);
+    for (int i = 0; i < strlen(text); ++i)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, text[i]);
+    }
+}
+
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glLoadIdentity();
+
+    // Draw white background
+    glColor3d(1.0, 1.0, 1.0);
+    glBegin(GL_QUADS);
+    glVertex2f(-1.0f, -1.0f);
+    glVertex2f(1.0f, -1.0f);
+    glVertex2f(1.0f, 1.0f);
+    glVertex2f(-1.0f, 1.0f);
+    glEnd();
+
+    // Draw cyan rectangle
+    glColor3d(0.0, 1.0, 1.0);
+    glBegin(GL_QUADS);
+    glVertex2f(-0.6f, -0.6f);
+    glVertex2f(0.6f, -0.6f);
+    glVertex2f(0.6f, 0.6f);
+    glVertex2f(-0.6f, 0.6f);
+    glEnd();
+
+    // Apply texture to the rectangle
+    GLuint textureID = loadTexture("E:/7th semester/FINALTERM/COMPUTER GRAPHICS/PERFORMANCE/5.image name/download (3).bmp");
+    glBindTexture(GL_TEXTURE_2D, textureID); // Bind the texture
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex2f(-0.6f, -0.6f);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex2f(0.6f, -0.6f);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex2f(0.6f, 0.6f);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex2f(-0.6f, 0.6f);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0); // Unbind the texture
+
+    // Draw the story text "Once upon a time"
+    glColor3f(0.0, 0.0, 0.0); // Black color
+    glPushMatrix();
+    glTranslatef(textPosition, 0.0f, 0.0f);
+    drawText("Lionel Messi has shaken hands with paradise", -0.6, -0.8);
+    glPopMatrix();
+
+    glFlush();
+    glutSwapBuffers();
+}
+
+void update(int value)
+{
+    // Increment text position for smooth movement
+    textPosition += 0.002f;
+
+    // Wrap around when reaching the end of the screen
+    if (textPosition > 2.0)
+    {
+        textPosition = -2.0;
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(16, update, 0); // Update at approximately 60 FPS
+}
+
+int main(int argc, char **argv)
+{
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowSize(800, 600);
+    glutCreateWindow("Lionel Messi has shaken hands with paradise");
+    loadImageAndStore("E:/7th semester/FINALTERM/COMPUTER GRAPHICS/PERFORMANCE/5.image name/download (3).bmp");
+
+    // Set up orthographic projection
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(-1.5, 1.5, -1.5, 1.5);
+
+    glutDisplayFunc(display);
+    glutTimerFunc(16, update, 0); // Start updating at approximately 60 FPS
+
+    glutMainLoop();
+
+    return 0;
+}
